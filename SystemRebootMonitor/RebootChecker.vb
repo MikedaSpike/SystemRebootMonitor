@@ -18,8 +18,10 @@ Module RebootChecker
         Try
             Dim rebooted As Boolean = CheckIfRebooted(minutes)
             Console.WriteLine("System rebooted within {0} minutes: {1}", minutes, rebooted)
+            Environment.Exit(If(rebooted, 0, 1))
         Catch ex As Exception
             Console.WriteLine("An error occurred: " & ex.Message)
+            Environment.Exit(1)
         End Try
     End Sub
 
