@@ -26,6 +26,9 @@
      ```
      RebootChecker /?
      ```
+4. **Exit Codes**:
+   - `0`: The system has rebooted within the specified number of minutes.
+   - `1`: The system has not rebooted within the specified number of minutes.
 
 ## Example
 
@@ -36,6 +39,20 @@ RebootChecker 10
 Output:
 ```
 System rebooted within 10 minutes: True
+```
+
+## Batch File Integration
+
+You can integrate this program with a batch file to perform actions based on the exit code. Example batch script:
+
+```batch
+@echo off
+RebootChecker.exe 10
+if %ERRORLEVEL% EQU 0 (
+    echo The system has rebooted within 10 minutes.
+) else (
+    echo The system has not rebooted within 10 minutes.
+)
 ```
 
 ## Contributing
