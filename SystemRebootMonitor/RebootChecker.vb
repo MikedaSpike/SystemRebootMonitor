@@ -1,4 +1,4 @@
-﻿Imports System.Management
+﻿Imports System.Diagnostics
 
 Module RebootChecker
     Sub Main(args As String())
@@ -32,13 +32,28 @@ Module RebootChecker
     End Sub
 
     Function CheckIfRebooted(minutes As Integer) As Boolean
-        Dim searcher As New ManagementObjectSearcher("SELECT LastBootUpTime FROM Win32_OperatingSystem")
-        For Each os As ManagementObject In searcher.Get()
-            Dim lastBootUpTime As DateTime = ManagementDateTimeConverter.ToDateTime(os("LastBootUpTime").ToString())
-            If (DateTime.Now - lastBootUpTime).TotalMinutes <= minutes Then
+        Try
+            Dim lastBootTime As DateTime = GetLastBootTime()
+            If (DateTime.Now - lastBootTime).TotalMinutes <= minutes Then
                 Return True
             End If
-        Next
+        Catch ex As Exception
+            Console.WriteLine("Error: " & ex.Message)
+        End Try
         Return False
+    End Function
+
+    Function GetLastBootTime() As DateTime
+        Dim eventLog As New EventLog("System")
+        Dim bootEventIDs As Integer() = {12, 13, 6005, 6006, 6013}
+
+        For i As Integer = eventLog.Entries.Count - 1 To 0 Step -1
+            Dim entry As EventLogEntry = eventLog.Entries(i)
+            If bootEventIDs.Contains(entry.EventID) Then
+                Return entry.TimeGenerated
+            End If
+        Next
+
+        Throw New Exception("Unable to retrieve last boot time from event log. Ensure the event log contains startup events with IDs: " & String.Join(", ", bootEventIDs))
     End Function
 End Module
